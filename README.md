@@ -3,7 +3,7 @@
 A full-stack web app to help users manage plant care using AI-assisted recommendations.
 
 ## Tech Stack
-- Frontend: React + Vite
+- Frontend: React + TypeScript + Vite
 - Backend: FastAPI
 - Database: PostgreSQL (coming soon)
 
@@ -112,7 +112,9 @@ Stores follow-up observation records.
 - [x] Initial React dashboard UI
 - [x] Project architecture planning
 - [x] Database schema planning
-- [ ] FastAPI backend setup
+- [x] Initial FastAPI backend setup
+- [x] GET /plants API
+- [x] POST /plants API
 - [ ] PostgreSQL integration
 - [ ] AI integration
 - [ ] Deployment

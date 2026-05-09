@@ -1,54 +1,28 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 
-const plants = [
-  {
-    id: 1,
-    nickname: "Kitchen Basil",
-    common_name: "Basil",
-    scientific_name: "Ocimum basilicum",
-    pet_friendly: true,
-    lighting: "Full Sun",
-    watering_frequency_days: 2,
-    harvest_frequency_days: 7,
-    waterStatus: "Water today",
-    status: "warning",
-    notes: "Growing well near the kitchen window.",
-    created_at: "2026-05-01",
-    updated_at: "2026-05-05",
-  },
-  {
-    id: 2,
-    nickname: "Living Room Lily",
-    common_name: "Peace Lily",
-    scientific_name: "Spathiphyllum wallisii",
-    pet_friendly: false,
-    lighting: "Bright Indirect Light",
-    watering_frequency_days: 3,
-    harvest_frequency_days: null,
-    waterStatus: "3 days overdue",
-    status: "danger",
-    notes: "Lower leaves recently started turning yellow.",
-    created_at: "2026-04-20",
-    updated_at: "2026-05-05",
-  },
-  {
-    id: 3,
-    nickname: "Bedroom Snake Plant",
-    common_name: "Snake Plant",
-    scientific_name: "Dracaena trifasciata",
-    pet_friendly: false,
-    lighting: "Low to Bright Indirect Light",
-    watering_frequency_days: 14,
-    harvest_frequency_days: null,
-    waterStatus: "In 11 days",
-    status: "good",
-    notes: "Very drought tolerant and low maintenance.",
-    created_at: "2026-03-15",
-    updated_at: "2026-05-05",
-  },
-];
+type Plant = {
+  id: number;
+  nickname: string;
+  common_name: string;
+  scientific_name: string;
+  watering_frequency_days: number;
+};
 
 function App() {
+  const [plants, setPlants] = useState<Plant[]>([]);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/plants")
+      .then((response) => response.json())
+      .then((data) => {
+        setPlants(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching plants:", error);
+      });
+  }, []);
+
   return (
     <main className="app">
       <header className="header">
@@ -96,9 +70,9 @@ function App() {
                   <h3>{plant.nickname}</h3>
                   <p>{plant.scientific_name}</p>
                 </div>
-
-                <span className={`status-pill ${plant.status}`}>
-                  {plant.waterStatus}
+                {/* <span className={`status-pill ${plant.status}`}> */}
+                <span className="status-pill">
+                  Water every {plant.watering_frequency_days} days
                 </span>
               </div>
             ))}
