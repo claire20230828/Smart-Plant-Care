@@ -5,7 +5,7 @@ A full-stack web app to help users manage plant care using AI-assisted recommend
 ## Tech Stack
 - Frontend: React + TypeScript + Vite
 - Backend: FastAPI
-- Database: PostgreSQL (coming soon)
+- Database: In-memory storage (temporary), PostgreSQL planned
 
 ---
 
@@ -14,6 +14,8 @@ A full-stack web app to help users manage plant care using AI-assisted recommend
 ### Plant Profile Management
 Users can:
 - Create plant profiles manually
+- Add plant profiles through a modal-based form UI
+- Frontend connected to FastAPI backend APIs
 - Generate plant information with AI assistance
 - Edit and manage plant details
 
@@ -114,7 +116,9 @@ Stores follow-up observation records.
 - [x] Database schema planning
 - [x] Initial FastAPI backend setup
 - [x] GET /plants API
-- [x] POST /plants API
+- [x] React modal-based Add Plant form
+- [x] Frontend-backend plant creation flow
+- [x] Dynamic plant dashboard rendering
 - [ ] PostgreSQL integration
 - [ ] AI integration
 - [ ] Deployment

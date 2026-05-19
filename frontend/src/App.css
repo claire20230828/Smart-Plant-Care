@@ -14,6 +14,8 @@ body {
   padding: 40px;
   max-width: 1100px;
   margin: 0 auto;
+  /* Undo #root { text-align: center } so dashboard panels list left-aligned body copy */
+  text-align: left;
 }
 
 .header {
@@ -118,6 +120,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
+  text-align: left;
+}
+
+.plant-row > div:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
 .plant-row h3 {
@@ -131,6 +140,7 @@ body {
 }
 
 .status-pill {
+  flex-shrink: 0;
   padding: 8px 12px;
   border-radius: 999px;
   font-size: 13px;
@@ -213,5 +223,378 @@ body {
   .summary-grid,
   .content-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.plant-form {
+  display: grid;
+  gap: 14px;
+}
+
+.plant-form input,
+.plant-form textarea {
+  width: 100%;
+  border: 1px solid #ddd8c9;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.plant-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #66736b;
+  font-weight: 600;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+/* Native <dialog>: reset UA styles (no thick border) — uses top-layer + optional inner card */
+.plant-dialog-shell {
+  padding: 0;
+  margin: 0;
+  border: none;
+  max-width: none;
+  max-height: none;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: transparent;
+  box-sizing: border-box;
+  overflow: visible;
+  text-align: left;
+  color: #1f3328;
+}
+
+.plant-dialog-shell::backdrop {
+  background: rgba(31, 51, 40, 0.35);
+}
+
+.plant-dialog-shell[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-backdrop.modal-backdrop-dialog {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 51, 40, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  /* Above #root / app chrome; portal mounts under body */
+  z-index: 9999;
+  box-sizing: border-box;
+}
+
+.plant-modal {
+  width: 680px;
+  max-width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #fbfaf4;
+  border-radius: 26px;
+  box-shadow: 0 24px 80px rgba(31, 51, 40, 0.25);
+  text-align: left;
+}
+
+.modal-header {
+  padding: 28px 32px;
+  border-bottom: 1px solid #ddd8c9;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.modal-header-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #1f3328;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 600;
+}
+
+.modal-header p {
+  margin: 8px 0 0;
+  color: #6c7a70;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.close-button {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  align-self: flex-start;
+  font-size: 28px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px 0 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #1f3328;
+  border-radius: 12px;
+}
+
+.close-button:hover {
+  background: rgba(31, 51, 40, 0.06);
+}
+
+.modal-form {
+  padding: 28px 32px 24px;
+  display: grid;
+  gap: 22px;
+}
+
+.modal-form-error {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #ffe0dd;
+  color: #7a2319;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  grid-column: 1 / -1;
+}
+
+.modal-form label {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  justify-items: stretch;
+  text-align: left;
+  font-size: 12px;
+  color: #6c7a70;
+  font-family: ui-monospace, Consolas, monospace;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 12px;
+  background: #ece8dd;
+  padding: 16px 18px;
+  font-size: 16px;
+  color: #1f3328;
+  font-family: Arial, Helvetica, sans-serif;
+  outline: none;
+  box-shadow: inset 0 -1px 2px rgba(31, 51, 40, 0.06);
+  appearance: auto;
+}
+
+.modal-form select {
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.modal-form input::placeholder,
+.modal-form textarea::placeholder {
+  color: #8a9088;
+}
+
+.modal-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.input-with-unit {
+  position: relative;
+}
+
+.input-with-unit span {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c7a70;
+  font-family: monospace;
+  font-weight: 700;
+}
+
+.input-with-unit input {
+  padding-right: 80px;
+}
+
+.pet-card {
+  background: #f0ede4;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.pet-card strong {
+  color: #1f3328;
+  font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pet-card p {
+  margin: 6px 0 0;
+  color: #6c7a70;
+  font-size: 14px;
+}
+
+/* Toggle switch (modal form labels are display:grid + width:100% — reset for switch row) */
+.switch {
+  position: relative;
+  width: 76px;
+  min-width: 76px;
+  max-width: 76px;
+  height: 42px;
+  flex-shrink: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.modal-form .pet-card label.switch {
+  display: block;
+  width: 76px;
+  min-width: 76px;
+  max-width: 76px;
+  height: 42px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  justify-items: unset;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch span {
+  position: absolute;
+  inset: 0;
+  background: #b8c9bf;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.switch span::before {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  right: 6px;
+  top: 6px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.switch input:checked + span {
+  background: #2f7553;
+}
+
+.switch input:checked + span::before {
+  transform: translateX(-34px);
+}
+
+.modal-actions {
+  border-top: 1px solid #ddd8c9;
+  padding-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.secondary-button,
+.save-button {
+  border: none;
+  border-radius: 18px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondary-button {
+  background: #fff;
+  border: 1px solid #ddd8c9;
+  color: #6c7a70;
+}
+
+.secondary-button:hover {
+  background: #fbfaf4;
+}
+
+.save-button {
+  background: #a9bfae;
+  color: white;
+}
+
+.secondary-button:disabled,
+.save-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .form-row,
+  .modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-header,
+  .modal-form {
+    padding: 24px;
   }
 }
