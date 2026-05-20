@@ -1,61 +1,50 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import "../App.css";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Link } from "react-router-dom";
+import AddPlantModal from "../components/AddPlantModal";
+import { fetchPlants, recordWatering, type Plant } from "../api/plants";
+import {
+  daysUntilWateringDue,
+  isInUpcomingWateringWindow,
+  wateringBadgeLabel,
+} from "../lib/wateringSchedule";
 
-const API_BASE = "http://127.0.0.1:8000";
-
-type Plant = {
-  id: number;
-  nickname: string;
-  common_name: string;
-  scientific_name: string;
-  pet_friendly: boolean;
-  lighting: string;
-  watering_frequency_days: number;
-  harvest_frequency_days: number | null;
-  notes?: string | null;
-};
-
-type PlantCreateBody = {
-  nickname: string;
-  common_name: string;
-  scientific_name: string;
-  pet_friendly: boolean;
-  lighting: string;
-  watering_frequency_days: number;
-  harvest_frequency_days: number | null;
-  notes: string | null;
-};
+function thumbPlaceholderStyle(plantId: number): CSSProperties {
+  const hue = ((plantId * 47) % 360) + 80;
+  return {
+    background: `linear-gradient(145deg, hsl(${hue}, 28%, 88%) 0%, hsl(${hue}, 35%, 72%) 100%)`,
+  };
+}
 
 function DashboardPage() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [addPlantModalOpen, setAddPlantModalOpen] = useState(false);
-  const addPlantDialogRef = useRef<HTMLDialogElement>(null);
+  const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
+  const [recordingWaterForId, setRecordingWaterForId] = useState<number | null>(null);
 
-  const [plantName, setPlantName] = useState("");
-  const [scientificName, setScientificName] = useState("");
-  const [wateringDays, setWateringDays] = useState(7);
-  const [lightNeeds, setLightNeeds] = useState("Medium");
-  const [harvestDaysRaw, setHarvestDaysRaw] = useState("");
-  const [petFriendly, setPetFriendly] = useState(false);
-  const [notes, setNotes] = useState("");
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const todayLabel = useMemo(
+    () =>
+      new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    [],
+  );
 
-  /** Opens the Add Plant overlay from the dashboard header. */
   function showAddPlantModal() {
+    setEditingPlant(null);
     setAddPlantModalOpen(true);
   }
 
-  /** Closes the overlay (backdrop, ×, Back, or after save later). */
   function hideAddPlantModal() {
     setAddPlantModalOpen(false);
+    setEditingPlant(null);
   }
 
-  const fetchPlants = useCallback(async () => {
+  const refreshPlants = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE}/plants`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data: Plant[] = await response.json();
+      const data = await fetchPlants();
       setPlants(data);
     } catch (error) {
       console.error("Error fetching plants:", error);
@@ -63,316 +52,190 @@ function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    void fetchPlants();
-  }, [fetchPlants]);
+    void refreshPlants();
+  }, [refreshPlants]);
 
-  useEffect(() => {
-    if (!addPlantModalOpen) return;
-    setPlantName("");
-    setScientificName("");
-    setWateringDays(7);
-    setLightNeeds("Medium");
-    setHarvestDaysRaw("");
-    setPetFriendly(false);
-    setNotes("");
-    setSubmitError(null);
-  }, [addPlantModalOpen]);
+  const upcomingEntries = useMemo(() => {
+    const rows = plants.map((plant) => {
+      const last = plant.last_watered_at ?? plant.created_at;
+      const daysUntil = daysUntilWateringDue(last, plant.watering_frequency_days);
+      return { plant, daysUntil };
+    });
+    return rows
+      .filter(({ daysUntil }) => isInUpcomingWateringWindow(daysUntil))
+      .sort((a, b) => a.daysUntil - b.daysUntil);
+  }, [plants]);
 
-  useEffect(() => {
-    const dialog = addPlantDialogRef.current;
-    if (!dialog) return;
+  const overdueCount = useMemo(
+    () =>
+      plants.filter((p) => {
+        const last = p.last_watered_at ?? p.created_at;
+        return daysUntilWateringDue(last, p.watering_frequency_days) < 0;
+      }).length,
+    [plants],
+  );
 
+  async function handleConfirmWatering(plant: Plant) {
+    setRecordingWaterForId(plant.id);
     try {
-      if (addPlantModalOpen && !dialog.open) dialog.showModal();
-      else if (!addPlantModalOpen && dialog.open) dialog.close();
-    } catch {
-      /* showModal twice in Strict Mode — ignore */
+      await recordWatering(plant.id);
+      await refreshPlants();
+    } catch (error) {
+      console.error("Error recording watering:", error);
+    } finally {
+      setRecordingWaterForId(null);
     }
-  }, [addPlantModalOpen]);
-
-  function onAddPlantDialogClose() {
-    setAddPlantModalOpen(false);
   }
 
-  async function handleCreatePlantSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitError(null);
-
-    const trimmedName = plantName.trim();
-    const trimmedSci = scientificName.trim();
-    if (!trimmedName || !trimmedSci) {
-      setSubmitError("Please enter plant name and scientific name.");
-      return;
-    }
-
-    const harvestParsed = harvestDaysRaw.trim();
-    let harvest_frequency_days: number | null = null;
-    if (harvestParsed !== "") {
-      const n = Number(harvestParsed);
-      if (!Number.isFinite(n) || n < 0) {
-        setSubmitError("Harvest frequency must be a non-negative number or left blank.");
-        return;
-      }
-      harvest_frequency_days = n;
-    }
-
-    const body: PlantCreateBody = {
-      nickname: trimmedName,
-      common_name: trimmedName,
-      scientific_name: trimmedSci,
-      pet_friendly: petFriendly,
-      lighting: lightNeeds,
-      watering_frequency_days: wateringDays,
-      harvest_frequency_days,
-      notes: notes.trim() === "" ? null : notes.trim(),
-    };
-
-    setSubmitting(true);
-    try {
-      const response = await fetch(`${API_BASE}/plants`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) {
-        const detail = await response.text();
-        throw new Error(detail || `HTTP ${response.status}`);
-      }
-      hideAddPlantModal();
-      await fetchPlants();
-    } catch (error) {
-      console.error("Error creating plant:", error);
-      setSubmitError("Could not save plant. Check the backend is running and try again.");
-    } finally {
-      setSubmitting(false);
-    }
+  function statusPillClass(kind: "overdue" | "today" | "tomorrow"): string {
+    if (kind === "overdue") return "dash-pill-status dash-pill-status--overdue";
+    if (kind === "today") return "dash-pill-status dash-pill-status--today";
+    return "dash-pill-status dash-pill-status--tomorrow";
   }
 
   return (
     <>
-    <main className="app">
-      <header className="header">
-        <div>
-          <p className="eyebrow">Smart Plant Care</p>
-          <h1>PlantMind Dashboard</h1>
-          <p className="subtitle">
-            Track watering, harvesting, and plant health observations.
-          </p>
-        </div>
+      <main className="app app-dashboard">
+        <header className="header">
+          <div>
+            <p className="eyebrow">Smart Plant Care</p>
+            <h1 className="dash-main-title">PlantMind Dashboard</h1>
+            <p className="subtitle">
+              Track watering, harvesting, and plant health observations.
+            </p>
+            <p className="dash-today-date">{todayLabel}</p>
+          </div>
 
-        <button className="add-button" onClick={showAddPlantModal} type="button">
+          <button className="add-button" onClick={showAddPlantModal} type="button">
             + Add Plant
-        </button>
-      </header>
+          </button>
+        </header>
 
-      <section className="summary-grid">
-        <div className="summary-card">
-          <h2>{plants.length}</h2>
-          <p>Total Plants</p>
-        </div>
-
-        <div className="summary-card warning">
-          <h2>1</h2>
-          <p>Water Today</p>
-        </div>
-
-        <div className="summary-card danger">
-          <h2>1</h2>
-          <p>Overdue</p>
-        </div>
-
-        <div className="summary-card">
-          <h2>2</h2>
-          <p>Monitoring</p>
-        </div>
-      </section>
-
-      <section className="content-grid">
-        <div className="panel">
-          <h2>Upcoming Watering</h2>
-
-          <div className="plant-list">
-            {plants.map((plant) => (
-              <div className="plant-row" key={plant.id}>
-                <div>
-                  <h3>{plant.nickname}</h3>
-                  <p>{plant.scientific_name}</p>
-                </div>
-
-                <span className="status-pill">
-                  Water every {plant.watering_frequency_days} days
-                </span>
+        <section className="dash-stat-section" aria-label="Summary statistics">
+          <div className="dash-stat-grid">
+            <Link className="dash-stat-card dash-stat-card--link dash-stat-total" to="/plants">
+              <div className="dash-stat-icon dash-stat-icon--green" aria-hidden>
+                🌿
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="dash-stat-body">
+                <span className="dash-stat-value">{plants.length}</span>
+                <span className="dash-stat-label">Total Plants</span>
+              </div>
+            </Link>
 
-        <div className="panel observation">
-          <h2>Active Observation</h2>
-
-          <span className="severity">Moderate</span>
-
-          <h3>Yellowing Leaves</h3>
-          <p className="plant-name">Monstera Deliciosa</p>
-
-          <p className="description">
-            Lower leaves are turning yellow. Possible causes include
-            overwatering, poor drainage, or lack of sunlight.
-          </p>
-
-          <div className="progress-text">
-            <span>Observation Progress</span>
-            <span>Day 5 / 14</span>
-          </div>
-
-          <div className="progress-bar">
-            <div className="progress-fill"></div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <dialog
-      ref={addPlantDialogRef}
-      className="plant-dialog-shell"
-      aria-labelledby="add-plant-title"
-      onClose={onAddPlantDialogClose}
-      onCancel={(e) => {
-        e.preventDefault();
-        hideAddPlantModal();
-      }}
-    >
-      <div
-        className="modal-backdrop modal-backdrop-dialog"
-        role="presentation"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) hideAddPlantModal();
-        }}
-      >
-        <div className="plant-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <div className="modal-header-title">
-              <h2 id="add-plant-title">Enter Plant Details</h2>
+            <div className="dash-stat-card dash-stat-overdue">
+              <div className="dash-stat-icon dash-stat-icon--red" aria-hidden>
+                💧
+              </div>
+              <div className="dash-stat-body">
+                <span className="dash-stat-value">{overdueCount}</span>
+                <span className="dash-stat-label">Overdue Water</span>
+              </div>
             </div>
 
-            <button
-              type="button"
-              className="close-button"
-              onClick={hideAddPlantModal}
-              aria-label="Close dialog"
-            >
-              ×
-            </button>
+            <div className="dash-stat-card dash-stat-monitoring">
+              <div className="dash-stat-icon dash-stat-icon--blue" aria-hidden>
+                👁
+              </div>
+              <div className="dash-stat-body">
+                <span className="dash-stat-value">2</span>
+                <span className="dash-stat-label">Monitoring</span>
+              </div>
+            </div>
+
+            <div className="dash-stat-card dash-stat-alerts">
+              <div className="dash-stat-icon dash-stat-icon--amber" aria-hidden>
+                ⚠️
+              </div>
+              <div className="dash-stat-body">
+                <span className="dash-stat-value">1</span>
+                <span className="dash-stat-label">Critical Alerts</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="content-grid dash-content-grid">
+          <div className="panel panel-upcoming">
+            <h2 className="panel-title-dash">
+              <span className="panel-title-dash-icon" aria-hidden>
+                💧
+              </span>
+              Upcoming Watering
+            </h2>
+
+            <div className="dash-plant-list">
+              {upcomingEntries.length === 0 ? (
+                <p className="dash-upcoming-empty">
+                  Nothing due today, overdue, or within one day. You’re all caught up for now.
+                </p>
+              ) : null}
+              {upcomingEntries.map(({ plant, daysUntil }) => {
+                const badge = wateringBadgeLabel(daysUntil);
+                if (!badge) return null;
+                const busy = recordingWaterForId === plant.id;
+                return (
+                  <div className="dashboard-plant-row" key={plant.id}>
+                    <div
+                      className="dashboard-plant-thumb"
+                      style={thumbPlaceholderStyle(plant.id)}
+                      aria-hidden
+                    />
+                    <div className="dashboard-plant-text">
+                      <h3 className="dashboard-plant-name">{plant.nickname}</h3>
+                      <p className="dashboard-plant-sci">{plant.scientific_name}</p>
+                    </div>
+                    <div className="dashboard-plant-pills">
+                      <span className={statusPillClass(badge.kind)}>
+                        <span aria-hidden>💧</span> {badge.label}
+                      </span>
+                      <button
+                        type="button"
+                        className="dash-watering-log-btn"
+                        disabled={busy}
+                        onClick={() => void handleConfirmWatering(plant)}
+                      >
+                        {busy ? "Saving…" : "Log watering"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          <form className="modal-form" onSubmit={handleCreatePlantSubmit}>
-            {submitError ? (
-              <p className="modal-form-error" role="alert">
-                {submitError}
-              </p>
-            ) : null}
+          <div className="panel observation observation-panel-dash">
+            <h2 className="panel-title-dash panel-title-dash--obs">Active Observation</h2>
 
-            <label>
-              Plant Name
-              <input
-                type="text"
-                placeholder="e.g. Golden Pothos"
-                value={plantName}
-                onChange={(ev) => setPlantName(ev.target.value)}
-              />
-            </label>
+            <span className="severity">Moderate</span>
 
-            <label>
-              Scientific Name
-              <input
-                type="text"
-                placeholder="Scientific name"
-                value={scientificName}
-                onChange={(ev) => setScientificName(ev.target.value)}
-              />
-            </label>
+            <h3 className="observation-issue-title">Yellowing Leaves</h3>
+            <p className="plant-name">Monstera Deliciosa</p>
 
-            <div className="form-row">
-              <label>
-                Watering (days)
-                <input
-                  type="number"
-                  min={1}
-                  value={wateringDays}
-                  onChange={(ev) => {
-                    const raw = ev.target.valueAsNumber;
-                    if (Number.isNaN(raw) || raw < 1) setWateringDays(1);
-                    else setWateringDays(Math.floor(raw));
-                  }}
-                />
-              </label>
+            <p className="description">
+              Lower leaves are turning yellow. Possible causes include overwatering, poor drainage,
+              or lack of sunlight.
+            </p>
 
-              <label>
-                Light Needs
-                <select
-                  value={lightNeeds}
-                  onChange={(ev) => setLightNeeds(ev.target.value)}
-                >
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>Bright indirect</option>
-                  <option>Full sun</option>
-                </select>
-              </label>
+            <div className="progress-text">
+              <span className="progress-caption">Observation Progress</span>
+              <span className="progress-caption">Day 5 / 14</span>
             </div>
 
-            <label>
-              Harvest Frequency (days, optional)
-              <input
-                type="number"
-                min={0}
-                placeholder="Leave blank if not applicable"
-                value={harvestDaysRaw}
-                onChange={(ev) => setHarvestDaysRaw(ev.target.value)}
-              />
-            </label>
-
-            <div className="pet-card pet-card-compact">
-              <strong>Pet Friendly</strong>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  aria-label="Pet friendly"
-                  checked={petFriendly}
-                  onChange={(ev) => setPetFriendly(ev.target.checked)}
-                />
-                <span></span>
-              </label>
+            <div className="progress-bar">
+              <div className="progress-fill"></div>
             </div>
+          </div>
+        </section>
+      </main>
 
-            <label>
-              Notes
-              <textarea
-                placeholder="Special care notes..."
-                value={notes}
-                onChange={(ev) => setNotes(ev.target.value)}
-              />
-            </label>
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                disabled={submitting}
-                onClick={hideAddPlantModal}
-              >
-                Back
-              </button>
-
-              <button type="submit" className="save-button" disabled={submitting}>
-                {submitting ? "Saving…" : "Create Profile"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </dialog>
-  </>
+      <AddPlantModal
+        open={addPlantModalOpen}
+        editingPlant={editingPlant}
+        onClose={hideAddPlantModal}
+        onSaved={refreshPlants}
+      />
+    </>
   );
 }
 

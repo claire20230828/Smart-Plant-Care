@@ -121,7 +121,31 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
   text-align: left;
+}
+
+.plant-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.plant-row-button {
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 12px;
+}
+
+.plant-row-button.danger-outline {
+  border-color: #d4a5a5;
+  color: #9a3d3d;
+}
+
+.plant-row-button.danger-outline:hover {
+  background: #fdf5f5;
 }
 
 .plant-row > div:first-child {
@@ -209,6 +233,364 @@ body {
   background: #d9a600;
 }
 
+/* —— Dashboard header typography (Fraunces + DM Sans) —— */
+.app-dashboard .header {
+  font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.app-dashboard .header .eyebrow {
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #2d8a5c;
+  margin: 0 0 10px;
+}
+
+.app-dashboard .header .dash-main-title {
+  margin: 0;
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.85rem, 2.8vw + 1rem, 2.65rem);
+  font-weight: 700;
+  font-optical-sizing: auto;
+  letter-spacing: -0.038em;
+  line-height: 1.12;
+  color: #12261a;
+}
+
+.app-dashboard .header .subtitle {
+  margin: 12px 0 0;
+  max-width: 36em;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.58;
+  color: #5a6a62;
+}
+
+.app-dashboard .dash-today-date {
+  margin: 10px 0 0;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  color: #6b7a72;
+}
+
+.dash-stat-section {
+  margin-bottom: 28px;
+}
+
+.dash-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1000px) {
+  .dash-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.dash-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 20px;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e8e4d9;
+  box-shadow: 0 8px 22px rgba(31, 51, 40, 0.06);
+  text-decoration: none;
+  color: inherit;
+  text-align: left;
+}
+
+.dash-stat-card--link {
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.dash-stat-card--link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(31, 51, 40, 0.1);
+}
+
+.dash-stat-card--link:focus-visible {
+  outline: 2px solid #2f7553;
+  outline-offset: 3px;
+}
+
+.dash-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.dash-stat-icon--green {
+  background: #e3f5ea;
+}
+
+.dash-stat-icon--red {
+  background: #fde8e8;
+}
+
+.dash-stat-icon--blue {
+  background: #e4edfd;
+}
+
+.dash-stat-icon--amber {
+  background: #fff4d6;
+}
+
+.dash-stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.app-dashboard .dash-stat-value {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: proportional-nums;
+}
+
+.dash-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.dash-stat-total .dash-stat-value {
+  color: #2f7553;
+}
+
+.dash-stat-overdue .dash-stat-value {
+  color: #d92d20;
+}
+
+.dash-stat-monitoring .dash-stat-value {
+  color: #2563eb;
+}
+
+.dash-stat-alerts .dash-stat-value {
+  color: #c77700;
+}
+
+.dash-stat-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a6b62;
+  letter-spacing: 0.02em;
+}
+
+.dash-content-grid {
+  align-items: start;
+}
+
+.panel-upcoming .panel-title-dash {
+  margin-top: 0;
+}
+
+.panel-title-dash {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1f3328;
+}
+
+.panel-title-dash-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.panel-title-dash--obs {
+  margin-bottom: 16px;
+}
+
+.dash-plant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dashboard-plant-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid #e0dfd7;
+  border-radius: 16px;
+  background: #fdfcf9;
+  text-align: left;
+}
+
+.dashboard-plant-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.dashboard-plant-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-plant-name {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f3328;
+}
+
+.dashboard-plant-sci {
+  margin: 6px 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  color: #66736b;
+}
+
+.dashboard-plant-pills {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.dash-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dash-pill-water {
+  background: #e8f4fc;
+  color: #1d6fa5;
+}
+
+.dash-pill-harvest {
+  background: #eef8e8;
+  color: #2f6b3a;
+}
+
+.dash-pill-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  white-space: nowrap;
+}
+
+.dash-pill-status--overdue {
+  background: #ffe0e6;
+  color: #b42318;
+}
+
+.dash-pill-status--today {
+  background: #fff4c8;
+  color: #933d00;
+}
+
+.dash-pill-status--tomorrow {
+  background: #dff7ea;
+  color: #166534;
+}
+
+.dash-watering-log-btn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: none;
+  background: #2f7553;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+  white-space: nowrap;
+  transition: filter 0.12s ease, transform 0.12s ease;
+}
+
+.dash-watering-log-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.dash-watering-log-btn:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.dash-upcoming-empty {
+  margin: 0;
+  padding: 20px 16px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7a72;
+  background: #f7f6f1;
+  border-radius: 16px;
+  border: 1px dashed #d5cfc2;
+}
+
+.observation-panel-dash .panel-title-dash--obs {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.observation-issue-title {
+  margin: 16px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.observation-panel-dash .progress-caption {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .dashboard-plant-row {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-plant-pills {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 850px) {
   .app {
     padding: 20px;
@@ -221,6 +603,7 @@ body {
   }
 
   .summary-grid,
+  .dash-stat-grid,
   .content-grid {
     grid-template-columns: 1fr;
   }
@@ -585,6 +968,322 @@ body {
 .save-button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+/* —— My Plants (Total Plants) —— */
+.summary-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.summary-card-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(31, 51, 40, 0.12);
+}
+
+.summary-card-link:focus-visible {
+  outline: 2px solid #2f7553;
+  outline-offset: 3px;
+}
+
+.my-plants-page {
+  min-height: 100vh;
+  padding: 32px 40px 48px;
+  max-width: 1240px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.my-plants-back {
+  margin: 0 0 20px;
+}
+
+.my-plants-back a {
+  color: #2f7553;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.my-plants-back a:hover {
+  text-decoration: underline;
+}
+
+.my-plants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.my-plants-title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1f3328;
+}
+
+.my-plants-date {
+  margin: 8px 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  color: #66736b;
+}
+
+.my-plants-add {
+  flex-shrink: 0;
+}
+
+.my-plants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+@media (max-width: 960px) {
+  .my-plants-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .my-plants-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plant-card {
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(31, 51, 40, 0.07);
+  border: 1px solid #e8e4d9;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.plant-card-media {
+  position: relative;
+}
+
+.plant-card-image-placeholder {
+  display: block;
+  height: 152px;
+  width: 100%;
+}
+
+.plant-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.plant-card-badge.safe {
+  background: #dff7ea;
+  color: #1f8a5b;
+}
+
+.plant-card-badge.toxic {
+  background: #fde8e8;
+  color: #b42318;
+}
+
+.plant-card-body {
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.plant-card-name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f3328;
+}
+
+.plant-card-sci {
+  margin: 6px 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  font-style: italic;
+  color: #5a6b62;
+}
+
+.plant-card-tags {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plant-card-tags li {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e8f2ea;
+  color: #2f5c45;
+}
+
+.plant-card-care {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #ebe6db;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.care-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.care-label {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.care-label-text {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: #3d4a42;
+}
+
+.care-value {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #2f7553;
+}
+
+.plant-card-actions {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.plant-card-report {
+  flex: 1;
+  min-width: 120px;
+  margin-top: 0;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  width: auto;
+  border: 1px solid #d5cfc2;
+  border-radius: 14px;
+  background: #faf9f5;
+  color: #4d5c54;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.plant-card-report:hover {
+  background: #f0efe8;
+  border-color: #c4bdb0;
+}
+
+.plant-card-side-btn {
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 12px 14px;
+  border: 1px solid #ddd8c9;
+  border-radius: 14px;
+  background: #fff;
+  color: #4d5c54;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.plant-card-side-btn:hover {
+  background: #fbfaf4;
+}
+
+.plant-card-side-btn-danger {
+  border-color: #e8c5c5;
+  color: #9a3d3d;
+}
+
+.plant-card-side-btn-danger:hover {
+  background: #fdf5f5;
+}
+
+.plant-card-add {
+  border: 2px dashed #c4bdb0;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 22px;
+  min-height: 420px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font: inherit;
+  color: #66736b;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.plant-card-add:hover {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: #2f7553;
+  color: #2f7553;
+}
+
+.plant-card-add:focus-visible {
+  outline: 2px solid #2f7553;
+  outline-offset: 3px;
+}
+
+.plant-card-add-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.plant-card-add-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 2px solid #c4bdb0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 400;
 }
 
 @media (max-width: 700px) {
